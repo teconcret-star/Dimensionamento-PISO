@@ -253,6 +253,77 @@
       margin: 0.8rem 0 0.4rem;
       letter-spacing: 0.06em;
     }
+
+    /* ─── Quantitativo de Obra ────────────────────────────────────── */
+    .pdf-drop {
+      border: 2px dashed #4299e1;
+      border-radius: 10px;
+      padding: 1.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+      background: #ebf8ff;
+      margin-bottom: 1rem;
+    }
+    .pdf-drop:hover, .pdf-drop.dragover {
+      background: #bee3f8;
+      border-color: #2b6cb0;
+    }
+    .pdf-drop input[type="file"] { display: none; }
+    .pdf-status {
+      font-size: 0.82rem;
+      padding: 0.5rem 0.8rem;
+      border-radius: 6px;
+      margin-bottom: 1rem;
+      background: #f0fff4;
+      border: 1px solid #9ae6b4;
+    }
+    .quant-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 0.75rem;
+      margin: 1rem 0;
+    }
+    .quant-item {
+      background: #f0fff4;
+      border-left: 4px solid #48bb78;
+      border-radius: 6px;
+      padding: 0.6rem 0.8rem;
+    }
+    .quant-item .ql { font-size: 0.75rem; color: #276749; margin-bottom: 0.1rem; }
+    .quant-item .qv { font-size: 1.1rem; font-weight: 700; color: #22543d; }
+    .quant-item .qu { font-size: 0.72rem; color: #4a5568; }
+    .pillar-type-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0.75rem;
+      margin: 0.5rem 0;
+    }
+    .info-box {
+      background: #ebf8ff;
+      border: 1px solid #90cdf4;
+      border-radius: 8px;
+      padding: 0.6rem 0.9rem;
+      font-size: 0.8rem;
+      color: #2c5282;
+      margin: 0.4rem 0;
+    }
+    .btn-quant {
+      width: 100%;
+      padding: 0.75rem;
+      background: linear-gradient(135deg, #276749, #48bb78);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.04em;
+      transition: opacity 0.2s, transform 0.1s;
+      margin-top: 0.5rem;
+    }
+    .btn-quant:hover  { opacity: 0.9; }
+    .btn-quant:active { transform: scale(0.98); }
   </style>
 </head>
 <body>
@@ -614,6 +685,129 @@
     <div class="rec-box" id="recBox">
       <h3>💡 Recomendações e Verificações</h3>
       <ul id="recList"></ul>
+    </div>
+  </div>
+
+  <!-- ─── Quantitativo de Obra ──────────────────── -->
+  <div class="card full">
+    <h2><span class="icon">📋</span> 4. Quantitativo de Obra</h2>
+
+    <!-- PDF Upload -->
+    <div class="section-title">Leitura de Projeto PDF (opcional)</div>
+    <div class="pdf-drop" id="pdfDrop"
+         onclick="document.getElementById('pdfFileInput').click()"
+         ondragover="event.preventDefault();this.classList.add('dragover')"
+         ondragleave="this.classList.remove('dragover')"
+         ondrop="handlePdfDrop(event)">
+      <input type="file" id="pdfFileInput" accept=".pdf" onchange="handlePdfFile(this.files[0])" />
+      <div style="font-size:1.8rem;margin-bottom:0.4rem">📄</div>
+      <div style="font-weight:600;color:#2b6cb0">Clique ou arraste um PDF de projeto aqui</div>
+      <div style="font-size:0.78rem;color:#718096;margin-top:0.3rem">O sistema tentará extrair: área total, nº de pilares e distância entre pilares</div>
+    </div>
+    <div id="pdfStatus" class="pdf-status" style="display:none"></div>
+
+    <!-- Inputs -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
+
+      <div class="field-group">
+        <div class="section-title">Dados do Projeto</div>
+
+        <div class="field">
+          <label>Área total interna</label>
+          <div class="field-row">
+            <input type="number" id="qArea" value="" min="1" max="999999" step="10" placeholder="ex: 2400" />
+            <span class="unit">m²</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Distância entre pilares alinhados</label>
+          <div class="field-row">
+            <input type="number" id="qSpan" value="" min="1" max="50" step="0.5" placeholder="ex: 10" />
+            <span class="unit">m</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Espessura do piso h <span class="tip" title="Use o valor da seção 2 acima">ⓘ</span></label>
+          <div class="field-row">
+            <input type="number" id="qThick" value="15" min="8" max="40" step="1" />
+            <span class="unit">cm</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Área de cada reforço de tela <span class="tip" title="1,0 a 1,5 m² por reforço conforme projeto">ⓘ</span></label>
+          <div class="field-row">
+            <input type="number" id="qMeshArea" value="1.25" min="1.0" max="1.5" step="0.05" />
+            <span class="unit">m²</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <div class="section-title">Distribuição de Pilares</div>
+
+        <div class="field">
+          <label>Nº total de pilares</label>
+          <div class="field-row">
+            <input type="number" id="qNtotal" value="" min="1" max="9999" step="1"
+                   placeholder="ex: 48" oninput="estimatePillarTypes()" />
+            <span class="unit">un</span>
+          </div>
+        </div>
+
+        <div class="info-box">
+          Distribuição estimada automaticamente para grade retangular. Ajuste conforme o layout real do projeto.
+        </div>
+
+        <div class="pillar-type-grid">
+          <div class="field-group">
+            <div class="section-title" style="font-size:0.7rem;color:#742a2a">🔴 Canto</div>
+            <div class="field-row">
+              <input type="number" id="qNcanto" value="4" min="0" max="100" step="1" />
+              <span class="unit">un</span>
+            </div>
+            <div style="font-size:0.7rem;color:#718096;margin-top:0.2rem">1 reforço / pilar</div>
+          </div>
+          <div class="field-group">
+            <div class="section-title" style="font-size:0.7rem;color:#744210">🟡 Extremidade</div>
+            <div class="field-row">
+              <input type="number" id="qNext" value="0" min="0" max="9999" step="1" />
+              <span class="unit">un</span>
+            </div>
+            <div style="font-size:0.7rem;color:#718096;margin-top:0.2rem">2 reforços / pilar</div>
+          </div>
+          <div class="field-group">
+            <div class="section-title" style="font-size:0.7rem;color:#276749">🟢 Interno</div>
+            <div class="field-row">
+              <input type="number" id="qNint" value="0" min="0" max="9999" step="1" />
+              <span class="unit">un</span>
+            </div>
+            <div style="font-size:0.7rem;color:#718096;margin-top:0.2rem">4 reforços / pilar</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <button class="btn-quant" onclick="calculateQuantitativo()">📋 CALCULAR QUANTITATIVO DE OBRA</button>
+
+    <!-- Results -->
+    <div id="quantResults" style="display:none;margin-top:1.5rem">
+      <h3 style="font-size:0.9rem;color:#1a365d;margin-bottom:0.75rem">📦 Resumo do Quantitativo</h3>
+      <div class="quant-grid" id="quantGrid"></div>
+
+      <h3 style="font-size:0.9rem;color:#1a365d;margin:1rem 0 0.5rem">Memória de Cálculo — Quantitativo</h3>
+      <table class="step-table" id="quantTable">
+        <thead><tr><th>Item</th><th>Descrição</th><th>Cálculo</th><th>Quantidade</th></tr></thead>
+        <tbody id="quantBody"></tbody>
+      </table>
+
+      <div class="rec-box" style="margin-top:0.75rem">
+        <h3>📝 Premissas e Notas</h3>
+        <ul id="quantNotes"></ul>
+      </div>
     </div>
   </div>
 
@@ -1120,6 +1314,320 @@ window.addEventListener('load', () => {
   toggleRodagem();
   toggleArmType();
 });
+
+/* =====================================================================
+   QUANTITATIVO DE OBRA
+   ===================================================================== */
+
+/* ─── PDF.js lazy loader ─── */
+let _pdfjsLib = null;
+function loadPdfJs() {
+  if (_pdfjsLib) return Promise.resolve(_pdfjsLib);
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+    s.onload = () => {
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+        'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      _pdfjsLib = window.pdfjsLib;
+      resolve(_pdfjsLib);
+    };
+    s.onerror = () => reject(new Error('Falha ao carregar PDF.js do CDN.'));
+    document.head.appendChild(s);
+  });
+}
+
+/* ─── Drag-and-drop handler ─── */
+function handlePdfDrop(event) {
+  event.preventDefault();
+  $('pdfDrop').classList.remove('dragover');
+  const file = event.dataTransfer.files[0];
+  if (file && file.type === 'application/pdf') handlePdfFile(file);
+}
+
+/* ─── Main PDF handler ─── */
+async function handlePdfFile(file) {
+  if (!file) return;
+  const status = $('pdfStatus');
+  status.style.display = 'block';
+  status.style.background = '#ebf8ff';
+  status.style.borderColor = '#90cdf4';
+  status.innerHTML = '⏳ Carregando leitor de PDF e processando arquivo…';
+
+  try {
+    const lib = await loadPdfJs();
+    const buf = await file.arrayBuffer();
+    const pdf = await lib.getDocument({ data: buf }).promise;
+
+    let fullText = '';
+    const pages = Math.min(pdf.numPages, 30);
+    for (let i = 1; i <= pages; i++) {
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      fullText += content.items.map(it => it.str).join(' ') + '\n';
+    }
+
+    const parsed = parsePdfText(fullText);
+    let found = 0;
+    let msg = `✅ PDF processado — ${pdf.numPages} página(s). `;
+
+    if (parsed.area !== null) {
+      $('qArea').value = parsed.area;
+      msg += `Área: <strong>${parsed.area} m²</strong>. `;
+      found++;
+    }
+    if (parsed.pilares !== null) {
+      $('qNtotal').value = parsed.pilares;
+      estimatePillarTypes();
+      msg += `Pilares: <strong>${parsed.pilares}</strong>. `;
+      found++;
+    }
+    if (parsed.span !== null) {
+      $('qSpan').value = parsed.span;
+      msg += `Distância: <strong>${parsed.span} m</strong>. `;
+      found++;
+    }
+
+    if (found === 0) {
+      msg = '⚠️ PDF processado mas nenhum valor foi identificado automaticamente. Por favor, preencha os campos manualmente.';
+      status.style.background = '#fffbeb';
+      status.style.borderColor = '#f6e05e';
+    } else if (found < 3) {
+      msg += `— ${3 - found} valor(es) não identificado(s), preencha manualmente.`;
+      status.style.background = '#fffbeb';
+      status.style.borderColor = '#f6e05e';
+    }
+    status.innerHTML = msg;
+  } catch (err) {
+    status.style.background = '#fff5f5';
+    status.style.borderColor = '#fc8181';
+    status.innerHTML = `❌ Erro ao processar PDF: ${err.message}. Preencha os campos manualmente.`;
+  }
+}
+
+/* ─── PDF text parser ─── */
+function parsePdfText(text) {
+  const result = { area: null, pilares: null, span: null };
+  // Normalise: lowercase, commas → dots, collapse spaces
+  const t = text.toLowerCase().replace(/,/g, '.').replace(/\s+/g, ' ');
+
+  // ── Area ──
+  const areaPatterns = [
+    /(?:\u00e1rea|area)\s+(?:total|interna|constru[íi]da|\u00fatil)?\s*[=:–-]?\s*([\d]+(?:\.[\d]+)?)\s*m[²2]/,
+    /([\d]{3,6}(?:\.[\d]+)?)\s*m[²2]/,
+  ];
+  for (const pat of areaPatterns) {
+    const m = t.match(pat);
+    if (m) {
+      const v = parseFloat(m[1]);
+      if (v >= 50 && v <= 999999) { result.area = v; break; }
+    }
+  }
+
+  // ── Pilares ──
+  const pilarPatterns = [
+    /(?:n[°º\u00ba]|n[úu]mero|qtd|quantidade)\s+(?:de\s+)?(?:pilares?|colunas?)\s*[=:–-]?\s*(\d+)/,
+    /(\d+)\s+pilares?/,
+    /pilares?\s*[=:–-]\s*(\d+)/,
+    /(\d+)\s+colunas?/,
+  ];
+  for (const pat of pilarPatterns) {
+    const m = t.match(pat);
+    if (m) {
+      const v = parseInt(m[1]);
+      if (v >= 2 && v <= 9999) { result.pilares = v; break; }
+    }
+  }
+
+  // ── Span / distance ──
+  const spanPatterns = [
+    /dist[âa]ncia\s+(?:entre\s+)?(?:pilares?|colunas?)\s*[=:–-]?\s*([\d]+(?:\.[\d]+)?)\s*m/,
+    /espa[çc]amento\s+(?:de\s+)?(?:pilares?|colunas?)\s*[=:–-]?\s*([\d]+(?:\.[\d]+)?)/,
+    /v[ãa]o\s+livre\s*[=:–-]?\s*([\d]+(?:\.[\d]+)?)\s*m/,
+    /v[ãa]o\s*[=:–-]?\s*([\d]+(?:\.[\d]+)?)\s*m/,
+  ];
+  for (const pat of spanPatterns) {
+    const m = t.match(pat);
+    if (m) {
+      const v = parseFloat(m[1]);
+      if (v >= 1 && v <= 50) { result.span = v; break; }
+    }
+  }
+
+  return result;
+}
+
+/* ─── Auto-estimate pillar type distribution ─── */
+function estimatePillarTypes() {
+  const N = parseInt($('qNtotal').value) || 0;
+  if (N < 1) return;
+  if (N <= 4) {
+    $('qNcanto').value = Math.min(N, 4);
+    $('qNext').value = 0;
+    $('qNint').value = 0;
+    return;
+  }
+  // Estimate closest rectangular grid nx × ny with nx ≤ ny
+  let bestNx = 2, bestNy = Math.ceil(N / 2);
+  let bestDiff = Math.abs(bestNx * bestNy - N);
+  for (let nx = 2; nx <= Math.ceil(Math.sqrt(N)); nx++) {
+    const ny = Math.round(N / nx);
+    const diff = Math.abs(nx * ny - N);
+    if (diff < bestDiff) { bestDiff = diff; bestNx = nx; bestNy = ny; }
+  }
+  const nx = bestNx, ny = bestNy;
+  const N_canto = 4;
+  const N_ext   = Math.max(0, 2 * (nx - 2) + 2 * (ny - 2));
+  const N_int   = Math.max(0, N - N_canto - N_ext);
+  $('qNcanto').value = N_canto;
+  $('qNext').value   = N_ext;
+  $('qNint').value   = N_int;
+}
+
+/* ─── Quantitativo calculator ─── */
+function calculateQuantitativo() {
+  const area      = parseFloat($('qArea').value)     || 0;
+  const span      = parseFloat($('qSpan').value)     || 0;
+  const thick_cm  = parseFloat($('qThick').value)    || 15;
+  const meshArea  = parseFloat($('qMeshArea').value) || 1.25;
+  const N_total   = parseInt($('qNtotal').value)     || 0;
+  const N_canto   = parseInt($('qNcanto').value)     || 0;
+  const N_ext     = parseInt($('qNext').value)       || 0;
+  const N_int     = parseInt($('qNint').value)       || 0;
+
+  if (area <= 0 || span <= 0 || N_total <= 0) {
+    alert('Preencha: Área total interna, Distância entre pilares e Nº total de pilares.');
+    return;
+  }
+
+  const thick_m = thick_cm / 100;
+
+  // ── 1. Volume de concreto ──
+  const vol_concreto = area * thick_m;  // m³
+
+  // ── 2. Grade estimada para cálculo de juntas ──
+  let bestNx = 2, bestNy = Math.ceil(N_total / 2), bestDiff = Infinity;
+  for (let nx = 2; nx <= Math.ceil(Math.sqrt(N_total)); nx++) {
+    const ny = Math.round(N_total / nx);
+    const diff = Math.abs(nx * ny - N_total);
+    if (diff < bestDiff) { bestDiff = diff; bestNx = nx; bestNy = ny; }
+  }
+  const nx = Math.max(2, bestNx), ny = Math.max(2, bestNy);
+
+  // ── 3. Pentes (juntas serradas internas) ──
+  // Each pente = 1 joint segment of length L between two adjacent columns
+  // Internal joint segments: cuts running in x-direction + cuts running in y-direction
+  //   x-direction cuts: (ny-1) lines × (nx-1) segments each
+  //   y-direction cuts: (nx-1) lines × (ny-1) segments each
+  //   Total = 2 × (nx-1) × (ny-1)
+  const pente_count    = 2 * (nx - 1) * (ny - 1);
+  const trelica_count  = pente_count * 2;              // 2 trusses per pente
+  const trelica_m      = trelica_count * span;          // total truss length (m)
+  const bars_transf    = Math.ceil(pente_count * span / 0.30); // transfer bars @ 30 cm
+
+  // ── 4. Telas soldadas de reforço de pilares ──
+  const telas_canto = N_canto * 1;
+  const telas_ext   = N_ext   * 2;
+  const telas_int   = N_int   * 4;
+  const telas_total = telas_canto + telas_ext + telas_int;
+  const tela_area_m2 = telas_total * meshArea;
+
+  // ── 5. Barras diagonais Ø10mm (3 barras × 60 cm por quina exposta) ──
+  // Exposed slab corners per pillar type:
+  const corners_canto = N_canto * 1;
+  const corners_ext   = N_ext   * 2;
+  const corners_int   = N_int   * 4;
+  const total_corners = corners_canto + corners_ext + corners_int;
+  const bars_diag     = total_corners * 3;          // bars
+  const BAR_LEN       = 0.60;                        // m (30 cm each side)
+  const bars_diag_m   = bars_diag * BAR_LEN;
+
+  // ── Render summary cards ──
+  const qg = $('quantGrid');
+  qg.innerHTML = '';
+  [
+    { l: 'Volume de concreto',            v: vol_concreto.toFixed(2),  u: 'm³' },
+    { l: 'Pentes de junta (assembleias)', v: pente_count,              u: 'un' },
+    { l: 'Treliças para pentes',          v: trelica_count,            u: 'un' },
+    { l: 'Comp. total de treliças',       v: trelica_m.toFixed(1),     u: 'm' },
+    { l: 'Barras de transf. (Ø ≥ 12mm)', v: bars_transf,              u: 'barras' },
+    { l: 'Telas reforço — total',         v: telas_total,              u: 'peças' },
+    { l: 'Área telas de reforço',         v: tela_area_m2.toFixed(2),  u: 'm²' },
+    { l: 'Barras diagonais Ø10mm',        v: bars_diag,                u: 'barras' },
+    { l: 'Comp. total Ø10mm diagonal',    v: bars_diag_m.toFixed(1),   u: 'm' },
+  ].forEach(it => {
+    qg.innerHTML += `<div class="quant-item">
+      <div class="ql">${it.l}</div>
+      <div class="qv">${it.v}</div>
+      <div class="qu">${it.u}</div>
+    </div>`;
+  });
+
+  // ── Render steps table ──
+  const qb = $('quantBody');
+  qb.innerHTML = '';
+  [
+    { n: 1,  d: 'Volume de concreto',
+              f: `A × h = ${area} m² × ${thick_m} m`,
+              r: `${vol_concreto.toFixed(2)} m³ (+5% perdas → ${(vol_concreto*1.05).toFixed(2)} m³)` },
+    { n: 2,  d: `Grade de pilares estimada (nx × ny)`,
+              f: `nx=${nx}, ny=${ny}`,
+              r: `${nx} × ${ny} = ${nx*ny} pilares` },
+    { n: 3,  d: 'Segmentos de junta (dir. x)',
+              f: `(ny−1) × (nx−1) = ${ny-1} × ${nx-1}`,
+              r: `${(ny-1)*(nx-1)} segmentos` },
+    { n: 4,  d: 'Segmentos de junta (dir. y)',
+              f: `(nx−1) × (ny−1) = ${nx-1} × ${ny-1}`,
+              r: `${(nx-1)*(ny-1)} segmentos` },
+    { n: 5,  d: 'Total de pentes (juntas internas)',
+              f: '2 × (nx−1) × (ny−1)',
+              r: `${pente_count} un` },
+    { n: 6,  d: 'Treliças (2 por pente, comprimento = L)',
+              f: `${pente_count} × 2 × ${span} m`,
+              r: `${trelica_count} un = ${trelica_m.toFixed(1)} m` },
+    { n: 7,  d: 'Barras de transferência (a cada 30 cm)',
+              f: `${pente_count} pentes × ${span} m ÷ 0,30 m`,
+              r: `${bars_transf} barras` },
+    { n: 8,  d: 'Telas reforço — pilares de canto (1 / pilar)',
+              f: `${N_canto} × 1`,
+              r: `${telas_canto} peças` },
+    { n: 9,  d: 'Telas reforço — pilares de extremidade (2 / pilar)',
+              f: `${N_ext} × 2`,
+              r: `${telas_ext} peças` },
+    { n: 10, d: 'Telas reforço — pilares internos (4 / pilar)',
+              f: `${N_int} × 4`,
+              r: `${telas_int} peças` },
+    { n: 11, d: 'Total de telas de reforço',
+              f: `${telas_canto} + ${telas_ext} + ${telas_int}`,
+              r: `${telas_total} peças (${tela_area_m2.toFixed(2)} m²)` },
+    { n: 12, d: 'Quinas expostas — canto / extremidade / interno',
+              f: `${N_canto}×1 + ${N_ext}×2 + ${N_int}×4`,
+              r: `${total_corners} quinas` },
+    { n: 13, d: 'Barras diagonais Ø10mm (3 barras × 60 cm / quina)',
+              f: `${total_corners} × 3 × 0,60 m`,
+              r: `${bars_diag} barras = ${bars_diag_m.toFixed(1)} m` },
+  ].forEach(s => {
+    qb.innerHTML += `<tr>
+      <td><strong>${s.n}</strong></td>
+      <td>${s.d}</td>
+      <td style="font-family:monospace;font-size:0.78rem">${s.f}</td>
+      <td><strong>${s.r}</strong></td>
+    </tr>`;
+  });
+
+  // ── Notes ──
+  $('quantNotes').innerHTML = [
+    `Volume de concreto = Área × espessura. Recomenda-se acrescentar ~5% para perdas de concretagem.`,
+    `"Pente" = 2 treliças metálicas paralelas (uma de cada lado da junta) com barras de transferência a cada 30 cm, posicionadas em cada junta de contração serrada.`,
+    `Grade ${nx}×${ny} estimada com base no nº total de pilares. Ajuste os campos de canto / extremidade / interno se o layout for irregular.`,
+    `Telas soldadas de reforço: área unitária de ${meshArea} m² (range 1,0–1,5 m²). Consulte o projetista para especificação da malha.`,
+    `Barras diagonais Ø10mm: 3 barras a cada 8 cm na diagonal de cada quina da junta de isolamento do pilar, comprimento unitário estimado em 60 cm (30 cm para cada lado).`,
+    `Este quantitativo é uma estimativa para fins de levantamento. O quantitativo executivo deve ser elaborado por engenheiro habilitado com base nos desenhos definitivos.`,
+  ].map(n => `<li>${n}</li>`).join('');
+
+  $('quantResults').style.display = 'block';
+  $('quantResults').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
 </script>
 </body>
 </html>
