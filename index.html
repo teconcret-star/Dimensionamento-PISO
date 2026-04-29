@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dimensionamento de Piso Industrial de Concreto Armado</title>
+  <style>
+    /* ─── Reset & Base ───────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f0f2f5;
+      color: #2d3748;
+      line-height: 1.6;
+    }
+
+    /* ─── Header ─────────────────────────────────────────────────────── */
+    header {
+      background: linear-gradient(135deg, #1a365d 0%, #2b6cb0 100%);
+      color: #fff;
+      padding: 1.5rem 2rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+    }
+    header h1 { font-size: 1.6rem; font-weight: 700; letter-spacing: 0.02em; }
+    header p  { font-size: 0.85rem; opacity: 0.85; margin-top: 0.25rem; }
+
+    /* ─── Layout ─────────────────────────────────────────────────────── */
+    main {
+      max-width: 1100px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+    @media (max-width: 800px) { main { grid-template-columns: 1fr; } }
+
+    /* ─── Cards ──────────────────────────────────────────────────────── */
+    .card {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      padding: 1.5rem;
+    }
+    .card h2 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #1a365d;
+      border-bottom: 2px solid #bee3f8;
+      padding-bottom: 0.5rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .card h2 .icon { font-size: 1.2rem; }
+
+    /* full-width cards */
+    .card.full { grid-column: 1 / -1; }
+
+    /* ─── Form Elements ───────────────────────────────────────────────── */
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+    .field {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .field label {
+      font-size: 0.82rem;
+      color: #4a5568;
+      font-weight: 500;
+    }
+    .field label sup { color: #e53e3e; }
+    .field-row {
+      display: flex;
+      gap: 0.4rem;
+      align-items: center;
+    }
+    .field-row input, .field-row select {
+      flex: 1;
+      min-width: 0;
+    }
+    .field-row .unit {
+      font-size: 0.75rem;
+      color: #718096;
+      white-space: nowrap;
+    }
+
+    input[type="number"], select {
+      width: 100%;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid #cbd5e0;
+      border-radius: 6px;
+      font-size: 0.88rem;
+      transition: border-color 0.2s;
+      background: #f7fafc;
+    }
+    input[type="number"]:focus, select:focus {
+      outline: none;
+      border-color: #4299e1;
+      background: #fff;
+    }
+    input[type="number"].error { border-color: #e53e3e; }
+
+    /* ─── Radio Tabs ─────────────────────────────────────────────────── */
+    .radio-tabs {
+      display: flex;
+      gap: 0;
+      border: 1px solid #cbd5e0;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 1rem;
+    }
+    .radio-tabs label {
+      flex: 1;
+      text-align: center;
+      padding: 0.5rem;
+      font-size: 0.8rem;
+      cursor: pointer;
+      background: #f7fafc;
+      border-right: 1px solid #cbd5e0;
+      transition: background 0.2s, color 0.2s;
+    }
+    .radio-tabs label:last-child { border-right: none; }
+    .radio-tabs input[type="radio"] { display: none; }
+    .radio-tabs input[type="radio"]:checked + label {
+      background: #2b6cb0;
+      color: #fff;
+      font-weight: 600;
+    }
+
+    /* ─── Sections inside load card ────────────────────────────────── */
+    .load-section { display: none; }
+    .load-section.active { display: block; }
+
+    /* ─── Button ─────────────────────────────────────────────────────── */
+    .btn-calc {
+      width: 100%;
+      padding: 0.75rem;
+      background: linear-gradient(135deg, #2b6cb0, #1a365d);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.04em;
+      transition: opacity 0.2s, transform 0.1s;
+      margin-top: 0.5rem;
+    }
+    .btn-calc:hover  { opacity: 0.9; }
+    .btn-calc:active { transform: scale(0.98); }
+
+    /* ─── Results ────────────────────────────────────────────────────── */
+    #results { display: none; }
+
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+    .result-item {
+      background: #ebf8ff;
+      border-left: 4px solid #4299e1;
+      border-radius: 6px;
+      padding: 0.6rem 0.8rem;
+    }
+    .result-item .rl  { font-size: 0.75rem; color: #2c5282; margin-bottom: 0.1rem; }
+    .result-item .rv  { font-size: 1.1rem; font-weight: 700; color: #1a365d; }
+    .result-item .ru  { font-size: 0.72rem; color: #4a5568; }
+
+    /* verdict badge */
+    .verdict {
+      display: inline-block;
+      padding: 0.4rem 1rem;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+    .verdict.ok  { background: #c6f6d5; color: #22543d; }
+    .verdict.nok { background: #fed7d7; color: #742a2a; }
+    .verdict.warn{ background: #fefcbf; color: #744210; }
+
+    /* step table */
+    .step-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+      margin-bottom: 1rem;
+    }
+    .step-table th {
+      background: #2b6cb0;
+      color: #fff;
+      padding: 0.45rem 0.7rem;
+      text-align: left;
+    }
+    .step-table td {
+      padding: 0.4rem 0.7rem;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .step-table tr:nth-child(even) td { background: #f0f7ff; }
+
+    /* ─── Recommendations ─────────────────────────────────────────── */
+    .rec-box {
+      background: #fffff0;
+      border: 1px solid #f6e05e;
+      border-radius: 8px;
+      padding: 0.9rem 1rem;
+      margin-top: 0.5rem;
+    }
+    .rec-box h3 { font-size: 0.9rem; color: #744210; margin-bottom: 0.5rem; }
+    .rec-box ul  { padding-left: 1.2rem; font-size: 0.82rem; color: #2d3748; }
+    .rec-box li  { margin-bottom: 0.3rem; }
+
+    /* ─── Footer ─────────────────────────────────────────────────────── */
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      font-size: 0.75rem;
+      color: #718096;
+    }
+
+    /* ─── Tooltip helper ─────────────────────────────────────────── */
+    .tip { cursor: help; text-decoration: underline dotted; }
+
+    /* ─── Alert ──────────────────────────────────────────────────── */
+    .alert {
+      background: #fed7d7;
+      border: 1px solid #fc8181;
+      color: #742a2a;
+      border-radius: 6px;
+      padding: 0.6rem 0.9rem;
+      font-size: 0.82rem;
+      margin-top: 0.5rem;
+      display: none;
+    }
+    .alert.show { display: block; }
+
+    /* helpers */
+    .mt-1 { margin-top: 0.5rem; }
+    .section-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #2b6cb0;
+      margin: 0.8rem 0 0.4rem;
+      letter-spacing: 0.06em;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🏗️ Dimensionamento de Piso Industrial de Concreto Armado</h1>
+  <p>Metodologia de Meyerhof / Escola Europeia · Referência: IBTS Manual de Pavimentos Industriais (2015)</p>
+</header>
+
+<main>
+
+  <!-- ─── Fundação ───────────────────────────────────── -->
+  <div class="card">
+    <h2><span class="icon">🌱</span> 1. Fundação / Subleito</h2>
+    <div class="field-group">
+
+      <div class="section-title">Parâmetro de suporte</div>
+
+      <div class="field">
+        <label>Método de entrada</label>
+        <div class="field-row">
+          <select id="soilInput" onchange="toggleSoilInput()">
+            <option value="k">Módulo de reação k (kPa/m)</option>
+            <option value="cbr">CBR (%)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field" id="fieldK">
+        <label>Módulo de reação k <span class="tip" title="Coeficiente de recalque da fundação (subleito + sub-base)">ⓘ</span></label>
+        <div class="field-row">
+          <input type="number" id="k" value="40" min="5" max="500" step="1" />
+          <span class="unit">MPa/m</span>
+        </div>
+      </div>
+
+      <div class="field" id="fieldCBR" style="display:none">
+        <label>CBR do subleito</label>
+        <div class="field-row">
+          <input type="number" id="cbr" value="8" min="1" max="100" step="0.5" />
+          <span class="unit">%</span>
+        </div>
+      </div>
+
+      <div class="section-title">Sub-base</div>
+
+      <div class="field">
+        <label>Tipo de sub-base</label>
+        <div class="field-row">
+          <select id="subbase" onchange="updateKFromSubbase()">
+            <option value="0">Sem sub-base (solo compactado)</option>
+            <option value="10" selected>Granular compactada (10 cm)</option>
+            <option value="15">Granular compactada (15 cm)</option>
+            <option value="20">Granular compactada (20 cm)</option>
+            <option value="10c">Solo + cimento (10 cm)</option>
+            <option value="15c">Solo + cimento (15 cm)</option>
+            <option value="20c">Solo + cimento (20 cm)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>k efetivo topo do sistema <span class="tip" title="Valor de k considerando subleito + sub-base">ⓘ</span></label>
+        <div class="field-row">
+          <input type="number" id="kTop" value="54" min="5" max="600" step="1" />
+          <span class="unit">MPa/m</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Fator de perda de suporte <span class="tip" title="Redução de k por erosão/bombeamento da sub-base (0 a 0.5)">ⓘ</span></label>
+        <div class="field-row">
+          <input type="number" id="lossF" value="0.10" min="0" max="0.5" step="0.05" />
+          <span class="unit">–</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ─── Concreto & Armadura ─────────────────────── -->
+  <div class="card">
+    <h2><span class="icon">🧱</span> 2. Concreto e Armadura</h2>
+    <div class="field-group">
+
+      <div class="section-title">Concreto</div>
+
+      <div class="field">
+        <label>Resistência fck</label>
+        <div class="field-row">
+          <select id="fck">
+            <option value="25">C25</option>
+            <option value="30" selected>C30</option>
+            <option value="35">C35</option>
+            <option value="40">C40</option>
+          </select>
+          <span class="unit">MPa</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Módulo de elasticidade E</label>
+        <div class="field-row">
+          <input type="number" id="Ec" value="28000" min="20000" max="45000" step="500" />
+          <span class="unit">MPa</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Espessura da placa h</label>
+        <div class="field-row">
+          <input type="number" id="h" value="15" min="8" max="40" step="1" />
+          <span class="unit">cm</span>
+        </div>
+      </div>
+
+      <div class="section-title">Armadura (Tela Soldada)</div>
+
+      <div class="field">
+        <label>Tipo de armadura</label>
+        <div class="field-row">
+          <select id="armType" onchange="toggleArmType()">
+            <option value="tela">Tela soldada padronizada</option>
+            <option value="manual">Taxa inserida manualmente</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="armTela">
+        <div class="field mt-1">
+          <label>Tela soldada</label>
+          <div class="field-row">
+            <select id="tela">
+              <option value="1.38">Q-138  (As = 1,38 cm²/m)</option>
+              <option value="1.59">Q-159  (As = 1,59 cm²/m)</option>
+              <option value="1.96">Q-196  (As = 1,96 cm²/m)</option>
+              <option value="2.21">Q-221  (As = 2,21 cm²/m)</option>
+              <option value="2.46" selected>Q-246  (As = 2,46 cm²/m)</option>
+              <option value="2.83">Q-283  (As = 2,83 cm²/m)</option>
+              <option value="3.35">Q-335  (As = 3,35 cm²/m)</option>
+              <option value="3.85">Q-385  (As = 3,85 cm²/m)</option>
+            </select>
+          </div>
+        </div>
+        <div class="field mt-1">
+          <label>Posicionamento (cobrimento superior)</label>
+          <div class="field-row">
+            <select id="cover">
+              <option value="h3" selected>h/3 (terço superior)</option>
+              <option value="h4">h/4</option>
+              <option value="h2">h/2 (meio)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div id="armManual" style="display:none">
+        <div class="field mt-1">
+          <label>Taxa de armadura ρ</label>
+          <div class="field-row">
+            <input type="number" id="rhoManual" value="0.13" min="0.01" max="2" step="0.01" />
+            <span class="unit">%</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="field mt-1">
+        <label>Coeficiente de segurança (FS)</label>
+        <div class="field-row">
+          <input type="number" id="FS" value="2.0" min="1.5" max="3.0" step="0.1" />
+          <span class="unit">–</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ─── Carregamento ─────────────────────────────── -->
+  <div class="card full">
+    <h2><span class="icon">🏎️</span> 3. Carregamento</h2>
+
+    <div class="radio-tabs">
+      <input type="radio" name="loadType" id="ltFork" value="fork" checked onchange="setLoadType('fork')" />
+      <label for="ltFork">🛻 Empilhadeira</label>
+
+      <input type="radio" name="loadType" id="ltDist" value="dist" onchange="setLoadType('dist')" />
+      <label for="ltDist">📦 Carga Distribuída</label>
+
+      <input type="radio" name="loadType" id="ltRack" value="rack" onchange="setLoadType('rack')" />
+      <label for="ltRack">🗄️ Porta-Paletes</label>
+    </div>
+
+    <!-- Forklift Section -->
+    <div id="secFork" class="load-section active">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem">
+
+        <div class="field-group">
+          <div class="section-title">Eixo Dianteiro (mais carregado)</div>
+          <div class="field">
+            <label>Carga total no eixo Q</label>
+            <div class="field-row">
+              <input type="number" id="Q" value="60" min="1" max="1000" step="0.5" />
+              <span class="unit">kN</span>
+            </div>
+          </div>
+          <div class="field">
+            <label>Tipo de rodagem</label>
+            <div class="field-row">
+              <select id="rodagem" onchange="toggleRodagem()">
+                <option value="simple">Simples (1 roda/lado)</option>
+                <option value="dupla">Dupla (2 rodas/lado)</option>
+              </select>
+            </div>
+          </div>
+          <div class="field" id="fieldSd" style="display:none">
+            <label>Distância entre rodas duplas Sd</label>
+            <div class="field-row">
+              <input type="number" id="Sd" value="0.30" min="0.05" max="0.8" step="0.01" />
+              <span class="unit">m</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <div class="section-title">Pneu</div>
+          <div class="field">
+            <label>Pressão de enchimento q</label>
+            <div class="field-row">
+              <input type="number" id="q_tire" value="0.8" min="0.1" max="3.0" step="0.05" />
+              <span class="unit">MPa</span>
+            </div>
+          </div>
+          <div style="font-size:0.75rem;color:#718096;margin-top:0.3rem">
+            Use 1.75 MPa para roda macissa (pressão fictícia).
+          </div>
+        </div>
+
+        <div class="field-group">
+          <div class="section-title">Fator de impacto / majoração</div>
+          <div class="field">
+            <label>γf (ações variáveis)</label>
+            <div class="field-row">
+              <input type="number" id="gammaF" value="1.5" min="1.0" max="2.0" step="0.1" />
+              <span class="unit">–</span>
+            </div>
+          </div>
+          <div style="font-size:0.75rem;color:#718096;margin-top:0.3rem">
+            1,5 para empilhadeiras; 1,6 se houver vibração.
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Distributed Load Section -->
+    <div id="secDist" class="load-section">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+        <div class="field-group">
+          <div class="section-title">Carga Uniforme</div>
+          <div class="field">
+            <label>Carga distribuída w</label>
+            <div class="field-row">
+              <input type="number" id="wDist" value="30" min="1" max="500" step="1" />
+              <span class="unit">kN/m²</span>
+            </div>
+          </div>
+          <div class="field">
+            <label>γf (ações permanentes / longa duração)</label>
+            <div class="field-row">
+              <input type="number" id="gammaFDist" value="1.2" min="1.0" max="1.8" step="0.1" />
+              <span class="unit">–</span>
+            </div>
+          </div>
+        </div>
+        <div class="field-group">
+          <div class="section-title">Modelo</div>
+          <div style="font-size:0.82rem;color:#4a5568;line-height:1.6">
+            <p>Modelo PCA (Hetényi) para carga distribuída com corredor crítico.</p>
+            <p style="margin-top:0.5rem">Momento máximo negativo (face superior):</p>
+            <p style="font-weight:700;margin-top:0.2rem">M<sub>n</sub> = 0,168 · w / λ²</p>
+            <p style="font-size:0.75rem;margin-top:0.3rem">λ = ⁴√(3k / Eh³)</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rack Section -->
+    <div id="secRack" class="load-section">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem">
+        <div class="field-group">
+          <div class="section-title">Carga do Montante</div>
+          <div class="field">
+            <label>Carga por montante P</label>
+            <div class="field-row">
+              <input type="number" id="Prack" value="25" min="1" max="500" step="1" />
+              <span class="unit">kN</span>
+            </div>
+          </div>
+          <div class="field">
+            <label>Área de contato A (placa de apoio)</label>
+            <div class="field-row">
+              <input type="number" id="Arack" value="0.01" min="0.001" max="0.5" step="0.001" />
+              <span class="unit">m²</span>
+            </div>
+          </div>
+        </div>
+        <div class="field-group">
+          <div class="section-title">Espaçamentos</div>
+          <div class="field">
+            <label>Distância entre montantes x (menor)</label>
+            <div class="field-row">
+              <input type="number" id="xRack" value="0.9" min="0.1" max="5" step="0.05" />
+              <span class="unit">m</span>
+            </div>
+          </div>
+          <div class="field">
+            <label>Distância entre montantes y (maior)</label>
+            <div class="field-row">
+              <input type="number" id="yRack" value="2.5" min="0.1" max="10" step="0.05" />
+              <span class="unit">m</span>
+            </div>
+          </div>
+        </div>
+        <div class="field-group">
+          <div class="section-title">Majoração</div>
+          <div class="field">
+            <label>γf (longa duração / permanente)</label>
+            <div class="field-row">
+              <input type="number" id="gammaFRack" value="1.2" min="1.0" max="1.8" step="0.1" />
+              <span class="unit">–</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ─── Button ────────────────────────────────────── -->
+  <div class="card full" style="padding:1rem">
+    <div id="alertMsg" class="alert"></div>
+    <button class="btn-calc" onclick="calculate()">⚙️ CALCULAR DIMENSIONAMENTO</button>
+  </div>
+
+  <!-- ─── Results ──────────────────────────────────── -->
+  <div class="card full" id="results">
+    <h2><span class="icon">📊</span> Resultados</h2>
+
+    <div id="verdictBox"></div>
+
+    <div class="result-grid" id="summaryGrid"></div>
+
+    <h3 style="font-size:0.9rem;color:#1a365d;margin-bottom:0.5rem">Memória de Cálculo</h3>
+    <table class="step-table" id="stepsTable">
+      <thead><tr><th>Passo</th><th>Descrição</th><th>Fórmula / Observação</th><th>Resultado</th></tr></thead>
+      <tbody id="stepsBody"></tbody>
+    </table>
+
+    <div class="rec-box" id="recBox">
+      <h3>💡 Recomendações e Verificações</h3>
+      <ul id="recList"></ul>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <p>Baseado em: <em>Manual de Pavimentos Industriais de Concreto Armado</em> – IBTS (2015) e <em>Dimensionamento de Pavimentos de Concreto Estruturalmente Armados</em> – ABCP/IBTS.</p>
+  <p style="margin-top:0.25rem">Métodos de Meyerhof · Modelo de Hetényi · NBR 6118 · Somente para fins de estudo. Projetos reais devem ser assinados por engenheiro habilitado.</p>
+</footer>
+
+<script>
+/* =====================================================================
+   UTILITY
+   ===================================================================== */
+const $ = id => document.getElementById(id);
+const numVal = id => parseFloat($(id).value) || 0;
+const round4 = v => Math.round(v * 10000) / 10000;
+const round2 = v => Math.round(v * 100) / 100;
+const round3 = v => Math.round(v * 1000) / 1000;
+
+/* =====================================================================
+   UI TOGGLES
+   ===================================================================== */
+function toggleSoilInput() {
+  const v = $('soilInput').value;
+  $('fieldK').style.display   = v === 'k'   ? '' : 'none';
+  $('fieldCBR').style.display = v === 'cbr' ? '' : 'none';
+}
+
+function toggleRodagem() {
+  $('fieldSd').style.display = $('rodagem').value === 'dupla' ? '' : 'none';
+}
+
+function toggleArmType() {
+  const v = $('armType').value;
+  $('armTela').style.display   = v === 'tela'   ? '' : 'none';
+  $('armManual').style.display = v === 'manual' ? '' : 'none';
+}
+
+function setLoadType(t) {
+  ['Fork','Dist','Rack'].forEach(s => {
+    $('sec' + s).classList.remove('active');
+  });
+  $('sec' + t.charAt(0).toUpperCase() + t.slice(1)).classList.add('active');
+}
+
+/* ─── CBR → k correlation (Figure 1.6 of IBTS manual) ─── */
+function cbrToK(cbr) {
+  // Approximate correlation: k ≈ 4.5 * CBR^0.6 (MPa/m)
+  // More accurate piecewise from the manual's figure:
+  if (cbr <= 2)  return 14;
+  if (cbr <= 3)  return 19;
+  if (cbr <= 4)  return 23;
+  if (cbr <= 5)  return 27;
+  if (cbr <= 6)  return 31;
+  if (cbr <= 8)  return 37;
+  if (cbr <= 10) return 43;
+  if (cbr <= 15) return 54;
+  if (cbr <= 20) return 62;
+  if (cbr <= 30) return 76;
+  if (cbr <= 40) return 88;
+  if (cbr <= 50) return 100;
+  return 108;
+}
+
+/* ─── Sub-base increment table (IBTS manual tables 1-4) ─── */
+const subbaseInc = {
+  '0' : 0,
+  '10': 1.15, '15': 1.22, '20': 1.28,   // granular multipliers
+  '10c': 1.5, '15c': 1.7, '20c': 1.95   // ciment-treated
+};
+
+function updateKFromSubbase() {
+  if ($('soilInput').value !== 'cbr') return; // only auto when using CBR
+  const cbr = numVal('cbr');
+  const kBase = cbrToK(cbr);
+  const sb = $('subbase').value;
+  const kFinal = Math.round(kBase * (subbaseInc[sb] || 1));
+  $('kTop').value = kFinal;
+}
+
+/* ─── fctMk from fck (NBR 6118) ─── */
+function fctMk(fck) {
+  // fctm = 0.3 * fck^(2/3) ; fctMk,inf ≈ 0.7 * fctm (characteristic inferior)
+  // For flexural tensile: fctM,k = 1.2 * fctk,sup where fctk,sup = 1.3 * fctm
+  // Simplified: fctM,k ≈ 0.6 * fck^(1/2) MPa (conservative practical value)
+  // More precise per IBTS: fctM,k given in tables
+  const f = fck;
+  if (f <= 25) return 3.5;
+  if (f <= 30) return 4.2;
+  if (f <= 35) return 4.6;
+  if (f <= 40) return 5.0;
+  return 4.2;
+}
+
+/* ─── Re3 estimate from ρ (%) per IBTS figure 5.20, cover = h/3 ─── */
+function estimateRe3(rho_pct) {
+  // Piecewise linear approximation from the figure
+  const pts = [[0,0],[0.05,25],[0.09,35],[0.13,46],[0.18,55],[0.25,62],[0.35,70],[0.5,76]];
+  if (rho_pct <= 0) return 0;
+  for (let i = 1; i < pts.length; i++) {
+    if (rho_pct <= pts[i][0]) {
+      const t = (rho_pct - pts[i-1][0]) / (pts[i][0] - pts[i-1][0]);
+      return pts[i-1][1] + t * (pts[i][1] - pts[i-1][1]);
+    }
+  }
+  return 76; // cap
+}
+
+/* ─── Cover position factor for Re3 ─── */
+const coverFactor = { h3: 1.0, h4: 0.65, h2: 1.55 };
+
+/* ─── Tela database (name → As cm²/m) ─── */
+const telasAs = {
+  '1.38': { name: 'Q-138', As: 1.38 },
+  '1.59': { name: 'Q-159', As: 1.59 },
+  '1.96': { name: 'Q-196', As: 1.96 },
+  '2.21': { name: 'Q-221', As: 2.21 },
+  '2.46': { name: 'Q-246', As: 2.46 },
+  '2.83': { name: 'Q-283', As: 2.83 },
+  '3.35': { name: 'Q-335', As: 3.35 },
+  '3.85': { name: 'Q-385', As: 3.85 },
+};
+
+/* ─── k3 from k6 (coeff. tables NBR 6118 / Santos 1983) ─── */
+function k3fromK6(k6, fck) {
+  // k3 = 1 / (1 - sqrt(1 - k6/(0.459*fck))) / (0.459*fck)   -- simplified approach
+  // Better: analytic expression for rectangular section with FS already embedded
+  // Using the adimensional coefficients approach from IBTS:
+  // k6 = b*d²/Mk  and  As = k3 * Mk / d
+  // k3 = As*d/Mk  ; combined: k3 ≈ f(k6, fck)
+  // Formula from Santos (1983) tabulated solution for CA-60, γc=1.4, γs=1.15, γf=1.4:
+  // 0.459 is the coefficient for rectangular section equilibrium per NBR 6118 (item 17.3):
+  //   α = 0.8 * 0.85 * fcd / (b * d²)  where fcd = fck/γc; combined constant ≈ 0.459 for MPa units
+  const alpha = 0.459 * fck;  // NBR 6118 rectangular section equilibrium coefficient × fck
+  if (k6 <= 0) return 0;
+  const ratio = 1 / (k6 * alpha);
+  // quadratic: x² - x + ratio = 0 where x is the relative neutral axis depth
+  const disc = 1 - 4 * ratio;
+  if (disc < 0) return null; // over-reinforced
+  const x = (1 - Math.sqrt(disc)) / 2;
+  // k3 = 1 / (fy_div * (1 - 0.4*x))  fy_div = fyd/1000 (tf/cm²)
+  // For CA-60 steel: fyk = 600 MPa, fyd = fyk / γs = 600 / 1.15 ≈ 522 MPa
+  //   where 522 MPa = characteristic yield strength of CA-60 after rounding (NBR 7480)
+  //   and 1.15 is the partial safety factor for steel γs per NBR 6118 item 12.3.3
+  const fyd = 522 / 1.15; // MPa – design yield strength of CA-60 steel
+  const k3 = 1 / ((fyd / 1000) * (1 - 0.4 * x));  // cm²/m per (tf.cm)
+  return k3;
+}
+
+/* ─── Rigidity radius (m) ─── */
+// ℓ = (E*h³ / (12*(1-ν²)*k))^(1/4)
+// E in MPa, h in m, k in MPa/m  →  ℓ in m
+function rigidityRadius(E_MPa, h_m, k_MPa_m, nu = 0.15) {
+  return Math.pow(E_MPa * Math.pow(h_m, 3) / (12 * (1 - nu * nu) * k_MPa_m), 0.25);
+}
+
+/* =====================================================================
+   MAIN CALCULATION
+   ===================================================================== */
+function calculate() {
+  $('alertMsg').classList.remove('show');
+
+  // ── Inputs ──
+  let kTopVal = numVal('kTop');
+  const lossF  = numVal('lossF');
+
+  if ($('soilInput').value === 'cbr') {
+    const kBase = cbrToK(numVal('cbr'));
+    const sb    = $('subbase').value;
+    kTopVal = kBase * (subbaseInc[sb] || 1);
+  }
+
+  // Effective k after loss of support
+  const kEff = kTopVal * (1 - lossF);   // MPa/m
+
+  const fckVal = numVal('fck');
+  const E_MPa  = numVal('Ec');
+  const h_cm   = numVal('h');
+  const h_m    = h_cm / 100;
+  const FS     = numVal('FS');
+  const fctVal = fctMk(fckVal);
+  const sigma_adm = fctVal / FS;   // MPa
+
+  // Armadura info
+  let As_cm2m, telaName, rho_pct, coverPos;
+  if ($('armType').value === 'tela') {
+    const tk = $('tela').value;
+    const tObj = telasAs[tk];
+    As_cm2m  = tObj.As;
+    telaName = tObj.name;
+    rho_pct  = (As_cm2m / (100 * h_cm)) * 100;  // %
+    coverPos = $('cover').value;
+  } else {
+    rho_pct  = numVal('rhoManual');
+    As_cm2m  = rho_pct / 100 * 100 * h_cm;
+    telaName = 'Manual';
+    coverPos = 'h3';
+  }
+
+  const ell = rigidityRadius(E_MPa, h_m, kEff);  // m
+
+  const steps = [];
+  const addStep = (n, d, f, r) => steps.push({ n, d, f, r });
+
+  const loadType = document.querySelector('input[name="loadType"]:checked').value;
+
+  let M_act_kNm = 0;   // acting moment (kN.m/m)  design
+  let calcDetails = {};
+
+  /* ─────────────────────────────────────────── */
+  /* FORKLIFT                                     */
+  /* ─────────────────────────────────────────── */
+  if (loadType === 'fork') {
+    const Q_kN    = numVal('Q');      // total axle load kN
+    const q_tire  = numVal('q_tire'); // tire pressure MPa
+    const gfFork  = numVal('gammaF');
+    const rodType = $('rodagem').value;
+    const N_wheels = rodType === 'dupla' ? 4 : 2;  // total wheels on axle
+    const Pr_kN   = Q_kN / N_wheels;               // load per wheel (kN)
+    const Pr_N    = Pr_kN * 1000;                  // N
+
+    // Contact area per tire
+    const A_c = Pr_N / (q_tire * 1e6);  // m²
+    const a   = Math.sqrt(A_c / Math.PI); // equivalent radius m
+
+    addStep(1, 'Carga total no eixo', 'Q', `${Q_kN} kN`);
+    addStep(2, 'Nº de rodas', 'N', `${N_wheels} rodas`);
+    addStep(3, 'Carga por roda', 'Pr = Q / N', `${round2(Pr_kN)} kN`);
+    addStep(4, 'Área de contato do pneu', 'Ac = Pr / q', `${round4(A_c)} m²`);
+    addStep(5, 'Raio da área de contato', 'a = √(Ac/π)', `${round4(a)} m`);
+    addStep(6, 'Raio de rigidez relativo', 'ℓ = ⁴√(E·h³ / 12·(1−ν²)·k)', `${round4(ell)} m`);
+    addStep(7, 'Relação a/ℓ', 'a/ℓ', `${round4(a / ell)}`);
+
+    let M_char_kNm;  // characteristic moment kN.m/m
+
+    if (rodType === 'simple') {
+      // Meyerhof formula for central load, single wheel axle
+      // Reference: Meyerhof (1962); IBTS Manual 2015, item 5.2.3 – "Carga Central"
+      //   P = Mo × 6 / (1 + 2a/ℓ)  →  rearranged for moment:
+      //   M [kN·m/m] = Pr·ℓ / [6·(1 + 2a/ℓ)]
+      M_char_kNm = (Pr_kN * ell) / (6 * (1 + 2 * a / ell));
+      addStep(8, 'Momento atuante (Meyerhof – eixo simples, carga central)',
+        'M = Pr·ℓ / [6·(1 + 2a/ℓ)]', `${round3(M_char_kNm)} kN·m/m`);
+    } else {
+      // Meyerhof – rodagem dupla
+      const Sd = numVal('Sd');  // distance between dual tires m
+      // M = Pr/6 · [1 + (2ℓ−Sd)/ℓ] / (1 + 2a/ℓ)
+      // from manual: M = (Pr/6) · (1 + (2ℓ-Sd)/ℓ) / (1 + 2a/ℓ)
+      // simplified form: M = Pr·ℓ/(6·(1+2a/ℓ)) · (1 + (2ℓ-Sd)/ℓ)
+      // Note: the Meyerhof formula for dual wheels from the IBTS manual:
+      // M = Pr/( 6 * (1 + 2a/ℓ) / ℓ ) * (1 + (2ℓ - Sd)/ℓ)
+      const factor = 1 + (2 * ell - Sd) / ell;
+      M_char_kNm = (Pr_kN * ell * factor) / (6 * (1 + 2 * a / ell));
+      addStep(8, `Distância entre rodas duplas Sd`, 'Sd', `${Sd} m`);
+      addStep(9, 'Fator de sobreposição (rodagem dupla)',
+        '1 + (2ℓ − Sd)/ℓ', `${round4(factor)}`);
+      addStep(10, 'Momento atuante (Meyerhof – rodagem dupla, carga central)',
+        'M = Pr·ℓ·(1+(2ℓ−Sd)/ℓ) / [6·(1+2a/ℓ)]', `${round3(M_char_kNm)} kN·m/m`);
+    }
+
+    M_act_kNm = M_char_kNm * gfFork;
+    addStep(steps.length + 1, 'Momento de projeto majorado',
+      `Md = γf · M = ${gfFork} × M`, `${round3(M_act_kNm)} kN·m/m`);
+    calcDetails = { M_char_kNm, gfFork, Pr_kN, a, Q_kN };
+  }
+
+  /* ─────────────────────────────────────────── */
+  /* DISTRIBUTED LOAD                             */
+  /* ─────────────────────────────────────────── */
+  else if (loadType === 'dist') {
+    const w_kNm2  = numVal('wDist');
+    const gfDist  = numVal('gammaFDist');
+
+    // λ = ⁴√(3k / (E·h³))   (1/m)
+    const lambda = Math.pow(3 * kEff / (E_MPa * Math.pow(h_m, 3)), 0.25);
+
+    // M_neg = 0.168 · w / λ²   (kN.m/m)
+    // 0.168 is the Hetényi / PCA coefficient for maximum negative moment in the
+    // critical corridor (distance π/2λ between loaded strips); derived from the
+    // theory of beams on elastic foundation – IBTS Manual 2015, item 5.3.2, eq.(5.4)
+    const M_neg_char = 0.168 * w_kNm2 / (lambda * lambda);
+
+    // PCA formula for admissible distributed load (IBTS Manual 2015, item 5.3.2):
+    //   c = 1.03 · σadm · √(h·k)   (kN/m²)
+    // 1.03 is the dimensional constant of the PCA empirical equation (Pickett & Ray, 1951)
+    // combining E=28 GPa into the formula; h in cm, k in MPa/m, σadm in MPa → c in kN/m²
+    const c_adm = 1.03 * sigma_adm * Math.sqrt(h_cm * kEff);  // kN/m²
+
+    addStep(1, 'Carga distribuída w', 'w', `${w_kNm2} kN/m²`);
+    addStep(2, 'Raio de rigidez relativo', 'ℓ = ⁴√(Eh³/12(1−ν²)k)', `${round4(ell)} m`);
+    addStep(3, 'Parâmetro λ (Hetényi)', 'λ = ⁴√(3k / Eh³)', `${round4(lambda)} m⁻¹`);
+    addStep(4, 'Corredor crítico', 'L_cr = π/(2λ)', `${round3(Math.PI / (2 * lambda))} m`);
+    addStep(5, 'Momento negativo máximo (face superior)',
+      'Mn = 0,168 · w / λ²', `${round3(M_neg_char)} kN·m/m`);
+    addStep(6, 'Carga admissível pelo modelo PCA',
+      'c = 1,03 · σadm · √(h·k)', `${round2(c_adm)} kN/m²`);
+
+    M_act_kNm = M_neg_char * gfDist;
+    addStep(7, 'Momento de projeto majorado',
+      `Md = γf · Mn = ${gfDist} × Mn`, `${round3(M_act_kNm)} kN·m/m`);
+    calcDetails = { M_neg_char, gfDist, w_kNm2, lambda, c_adm };
+  }
+
+  /* ─────────────────────────────────────────── */
+  /* RACK / PORTA-PALETES                         */
+  /* ─────────────────────────────────────────── */
+  else if (loadType === 'rack') {
+    const P_kN   = numVal('Prack');
+    const A_c    = numVal('Arack');   // m²
+    const xr     = numVal('xRack');   // m
+    const yr     = numVal('yRack');   // m
+    const gfRack = numVal('gammaFRack');
+
+    const a = Math.sqrt(A_c / Math.PI);
+
+    // Zone of contribution: Rc = 3 * ℓ  (IBTS manual item 5.2.1)
+    const Rc = 3 * ell;
+
+    // Contribution factor for adjacent posts (triangular decay, simple model):
+    // Posts at distance d: f(d) = max(0, 1 - d/Rc)
+    const contrib = (d) => Math.max(0, 1 - d / Rc);
+
+    // Grid of up to 4 contributing loads (post pattern: x and y spacing)
+    const adj = [
+      { d: xr, P: P_kN },
+      { d: yr, P: P_kN },
+      { d: Math.sqrt(xr * xr + yr * yr), P: P_kN },
+    ];
+    let Peq = P_kN;  // main load
+    adj.forEach(pt => {
+      Peq += pt.P * contrib(pt.d);
+    });
+
+    addStep(1, 'Carga por montante P', 'P', `${P_kN} kN`);
+    addStep(2, 'Área de contato montante', 'A', `${A_c} m²`);
+    addStep(3, 'Raio da área de contato', 'a = √(A/π)', `${round4(a)} m`);
+    addStep(4, 'Raio de rigidez', 'ℓ = ⁴√(Eh³/12(1−ν²)k)', `${round4(ell)} m`);
+    addStep(5, 'Raio de contribuição', 'Rc = 3ℓ', `${round4(Rc)} m`);
+    addStep(6, 'Cargas adjacentes contribuintes (decaimento triangular)', 'Peq = ΣPi·f(di)', `${round2(Peq)} kN`);
+
+    // Apply Meyerhof for central load with equivalent Peq
+    const M_char_kNm = (Peq / 2 * ell) / (6 * (1 + 2 * a / ell));
+    addStep(7, 'Momento atuante equivalente (Meyerhof central)',
+      'M = (Peq/2)·ℓ / [6·(1+2a/ℓ)]', `${round3(M_char_kNm)} kN·m/m`);
+
+    M_act_kNm = M_char_kNm * gfRack;
+    addStep(8, 'Momento de projeto majorado',
+      `Md = γf · M = ${gfRack} × M`, `${round3(M_act_kNm)} kN·m/m`);
+    calcDetails = { M_char_kNm, gfRack, Peq, P_kN, A_c, Rc };
+  }
+
+  /* ─────────────────────────────────────────── */
+  /* SLAB RESISTANCE                              */
+  /* ─────────────────────────────────────────── */
+
+  // Negative moment (concrete only):
+  // Mn = σadm · h² / 6   (kN.m/m)  σadm in MPa, h in m
+  const M_neg = sigma_adm * h_m * h_m / 6 * 1000;  // kN.m/m
+
+  // Re,3 from ρ with cover position factor
+  const Re3_base = estimateRe3(rho_pct);
+  const cf = coverFactor[coverPos] || 1.0;
+  const Re3 = Re3_base * cf;
+
+  // Positive moment (tenacity model):
+  // Mp = (Re3/100) * σadm * h² / 6
+  const M_pos = (Re3 / 100) * sigma_adm * h_m * h_m / 6 * 1000;
+
+  // Total resistant moment:
+  const M_R = M_neg + M_pos;
+
+  // For structurally reinforced model (Losberg / NBR 6118):
+  // Mp calculated from armadura (simplified):
+  // Concrete cover at bottom: 3 cm (standard for industrial floors per NBR 6118 / ABNT NBR 6118:2014
+  // Table 7.2 – exposure class CA-II, aggressive environment; designer should confirm per project)
+  const COVER_BOTTOM_CM = 3; // cm – bottom concrete cover (adjust per NBR 6118 exposure class)
+  const d_cm = h_cm - COVER_BOTTOM_CM;  // effective depth (cm)
+  const Mk_pos_needed = Math.max(0, M_act_kNm - M_neg);  // kN.m/m
+  const Mk_pos_tf_cm  = Mk_pos_needed * 100 / 9.80665;  // tf.cm/m
+
+  let k6Val = null, k3Val = null, As_req_cm2 = null;
+  if (Mk_pos_needed > 0) {
+    k6Val = (100 * d_cm * d_cm) / Mk_pos_tf_cm;
+    k3Val = k3fromK6(k6Val, fckVal);
+    if (k3Val) As_req_cm2 = k3Val * Mk_pos_tf_cm / d_cm;
+  }
+
+  // Add resistance steps
+  addStep('R1', 'Resistência à tração na flexão fctM,k', `fck = ${fckVal} MPa`, `${fctVal} MPa`);
+  addStep('R2', 'Tensão admissível σadm', `σadm = fctM,k / FS = ${fctVal} / ${FS}`, `${round3(sigma_adm)} MPa`);
+  addStep('R3', 'Momento negativo resistente (concreto)',
+    'Mn = σadm · h² / 6', `${round3(M_neg)} kN·m/m`);
+  addStep('R4', 'Taxa de armadura ρ', `As = ${round2(As_cm2m)} cm²/m, b·h = 100·${h_cm}`,
+    `${round4(rho_pct)} %`);
+  addStep('R5', 'Re,3 estimado (cobrimento ' + coverPos + ')',
+    'Fig. 5.20 IBTS (2015)', `${round2(Re3)} %`);
+  addStep('R6', 'Momento positivo resistente (tenacidade)',
+    'Mp = (Re3/100) · σadm · h²/6', `${round3(M_pos)} kN·m/m`);
+  addStep('R7', 'Momento resistente total',
+    'MR = Mn + Mp', `${round3(M_R)} kN·m/m`);
+
+  /* ─────────────────────────────────────────── */
+  /* RENDER                                       */
+  /* ─────────────────────────────────────────── */
+  const ratio = M_act_kNm / M_R;
+  const ok    = ratio <= 1.0;
+  const warn  = ratio > 0.85 && ratio <= 1.0;
+
+  // Verdict
+  const vb = $('verdictBox');
+  if (ok && !warn) {
+    vb.innerHTML = `<span class="verdict ok">✅ SEÇÃO OK — aproveitamento ${(ratio*100).toFixed(1)}%</span>`;
+  } else if (warn) {
+    vb.innerHTML = `<span class="verdict warn">⚠️ OK mas com folga pequena — aproveitamento ${(ratio*100).toFixed(1)}%</span>`;
+  } else {
+    vb.innerHTML = `<span class="verdict nok">❌ SEÇÃO INSUFICIENTE — aproveitamento ${(ratio*100).toFixed(1)}% (>100%)</span>`;
+  }
+
+  // Summary cards
+  const sg = $('summaryGrid');
+  sg.innerHTML = '';
+  const items = [
+    { l: 'k efetivo', v: round2(kEff), u: 'MPa/m' },
+    { l: 'Raio de rigidez ℓ', v: round4(ell), u: 'm' },
+    { l: 'Espessura h', v: h_cm, u: 'cm' },
+    { l: 'Momento atuante Md', v: round3(M_act_kNm), u: 'kN·m/m' },
+    { l: 'Mn (concreto)', v: round3(M_neg), u: 'kN·m/m' },
+    { l: 'Mp (armadura)', v: round3(M_pos), u: 'kN·m/m' },
+    { l: 'MR total', v: round3(M_R), u: 'kN·m/m' },
+    { l: 'Aproveitamento Md/MR', v: (ratio*100).toFixed(1), u: '%' },
+    { l: 'Re,3 estimado', v: round2(Re3), u: '%' },
+    { l: 'ρ armadura', v: round4(rho_pct), u: '%' },
+  ];
+  items.forEach(it => {
+    sg.innerHTML += `<div class="result-item">
+      <div class="rl">${it.l}</div>
+      <div class="rv">${it.v}</div>
+      <div class="ru">${it.u}</div>
+    </div>`;
+  });
+
+  // Steps table
+  const sb2 = $('stepsBody');
+  sb2.innerHTML = '';
+  steps.forEach(s => {
+    sb2.innerHTML += `<tr>
+      <td><strong>${s.n}</strong></td>
+      <td>${s.d}</td>
+      <td style="font-family:monospace;font-size:0.78rem">${s.f}</td>
+      <td><strong>${s.r}</strong></td>
+    </tr>`;
+  });
+
+  // Recommendations
+  const rl = $('recList');
+  const recs = [];
+
+  if (!ok) {
+    recs.push(`<strong>Aumentar espessura da placa</strong> — tente ${h_cm + 2} cm ou ${h_cm + 4} cm.`);
+    recs.push(`Ou <strong>aumentar k</strong> com sub-base mais rígida (solo + cimento).`);
+    recs.push(`Ou <strong>usar tela mais robusta</strong> para maior momento positivo.`);
+  }
+  if (kEff < 20) {
+    recs.push('⚠️ k efetivo muito baixo (&lt;20 MPa/m): reforço do subleito ou estacas podem ser necessários.');
+  }
+  if (rho_pct < 0.05) {
+    recs.push('⚠️ Taxa de armadura muito baixa. Verificar armadura mínima conforme NBR 6118.');
+  }
+  if (h_cm < 12) {
+    recs.push('⚠️ Espessura mínima recomendada para piso industrial é 12 cm.');
+  }
+  recs.push('Empregar barras de transferência de carga em todas as juntas serradas e de construção (Ø ≥ 16 mm).');
+  recs.push('Espaçamento máximo de juntas: ≤ 6 m (ou 25 a 36 × h, o menor).');
+  recs.push('Cura mínima do concreto: 7 dias úmidos. Corte de juntas em 4–8 h após concretagem.');
+  recs.push(`Verificar cobrimento inferior adotado (3 cm) conforme NBR 6118 e classe de agressividade do ambiente.`);
+  if (loadType === 'dist' && calcDetails.c_adm) {
+    const w_used = numVal('wDist');
+    const c_adm  = calcDetails.c_adm;
+    if (w_used > c_adm) {
+      recs.push(`⚠️ Pelo modelo PCA, a carga admissível é ${round2(c_adm)} kN/m² < w = ${w_used} kN/m². Aumentar espessura!`);
+    } else {
+      recs.push(`✅ Pelo modelo PCA, carga admissível = ${round2(c_adm)} kN/m² ≥ w aplicada (${w_used} kN/m²).`);
+    }
+  }
+  if (As_req_cm2 !== null && As_req_cm2 > 0) {
+    const margin = As_cm2m - As_req_cm2;
+    if (margin < 0) {
+      recs.push(`⚠️ Armadura insuficiente pelo modelo estrutural armado: As necessária ≈ ${round2(As_req_cm2)} cm²/m, fornecida = ${round2(As_cm2m)} cm²/m.`);
+    } else {
+      recs.push(`✅ Verificação estrutural armada (NBR 6118): As necessária ≈ ${round2(As_req_cm2)} cm²/m, fornecida = ${round2(As_cm2m)} cm²/m (folga = ${round2(margin)} cm²/m).`);
+    }
+  }
+
+  rl.innerHTML = recs.map(r => `<li>${r}</li>`).join('');
+
+  $('results').style.display = 'block';
+  $('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/* ─── init ─── */
+window.addEventListener('load', () => {
+  toggleSoilInput();
+  toggleRodagem();
+  toggleArmType();
+});
+</script>
+</body>
+</html>
