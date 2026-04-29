@@ -1360,7 +1360,7 @@ async function handlePdfFile(file) {
     const pdf = await lib.getDocument({ data: buf }).promise;
 
     let fullText = '';
-    const pages = Math.min(pdf.numPages, 30);
+    const pages = Math.min(pdf.numPages, 30); // cap at 30 pages for performance
     for (let i = 1; i <= pages; i++) {
       const page = await pdf.getPage(i);
       const content = await page.getTextContent();
@@ -1539,7 +1539,7 @@ function calculateQuantitativo() {
   const corners_int   = N_int   * 4;
   const total_corners = corners_canto + corners_ext + corners_int;
   const bars_diag     = total_corners * 3;          // bars
-  const BAR_LEN       = 0.60;                        // m (30 cm each side)
+  const BAR_LEN       = 0.60;                        // m total per bar (≈30 cm each side of corner)
   const bars_diag_m   = bars_diag * BAR_LEN;
 
   // ── Render summary cards ──
@@ -1621,7 +1621,7 @@ function calculateQuantitativo() {
     `"Pente" = 2 treliças metálicas paralelas (uma de cada lado da junta) com barras de transferência a cada 30 cm, posicionadas em cada junta de contração serrada.`,
     `Grade ${nx}×${ny} estimada com base no nº total de pilares. Ajuste os campos de canto / extremidade / interno se o layout for irregular.`,
     `Telas soldadas de reforço: área unitária de ${meshArea} m² (range 1,0–1,5 m²). Consulte o projetista para especificação da malha.`,
-    `Barras diagonais Ø10mm: 3 barras a cada 8 cm na diagonal de cada quina da junta de isolamento do pilar, comprimento unitário estimado em 60 cm (30 cm para cada lado).`,
+    `Barras diagonais Ø10mm: 3 barras paralelas espaçadas a cada 8 cm (espaçamento transversal) na diagonal de cada quina da junta de isolamento do pilar, comprimento unitário estimado em 60 cm (≈30 cm para cada lado da quina).`,
     `Este quantitativo é uma estimativa para fins de levantamento. O quantitativo executivo deve ser elaborado por engenheiro habilitado com base nos desenhos definitivos.`,
   ].map(n => `<li>${n}</li>`).join('');
 
